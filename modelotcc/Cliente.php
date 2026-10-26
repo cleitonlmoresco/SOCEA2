@@ -1,8 +1,9 @@
 <?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SOCEA</title>
 
 <meta name="keywords" content="" />
@@ -13,7 +14,7 @@ Blue Urban Template
 http://www.templatemo.com/preview/templatemo_329_blue_urban
 -->
 <link href="templatemo_style.css" rel="stylesheet" type="text/css" />
-<script src="jquery-3.1.1.min.js"></script>
+<script src="jquery-3.7.1.min.js"></script>
 <link href="Style.css" rel="stylesheet" type="text/css" />
 
 </head>
@@ -24,7 +25,7 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
     <div id="templatemo_header">
     
    		<div id="site_title">
-            <h1><a href="#">SOCEA</span></a></h1>
+            <h1><a href="#">SOCEA</a></h1>
         </div> <!-- end of site_title -->
         
         <div id="templatemo_menu">
@@ -133,7 +134,7 @@ Escritório de Advocacia.</p>
     
           <!--Menu suspenço do topo-->
           <div id ="MenuTopo"><center><table ><tr>
-                     <td><h4><a href="#">SOCEA</span></a></h4></td>
+                     <td><h4><a href="#">SOCEA</a></h4></td>
              
              <td><img src="images/IconPefil.png" width="25" height="25"><?php echo   $_SESSION["usuarioNome"]?></td>
             <!--Icone da agenda-->         

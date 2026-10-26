@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA - Cliente </title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -18,22 +18,24 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
 
 </head>
 <body><br><br>
-    <?php #puxa a conexao  com o banco de dados
- include('Scripts/Conexao.php');
- 
- 
-#Pesquisa no banco de dados o nome , sobre nome, CPF ou Numero de telefone do cliente
-$Pesquisas = $_GET['Pesquisa'];
-$Pesquisador = "SELECT * FROM `$banco`.`perfilcliente` WHERE (CONVERT(`Nome` USING utf8) LIKE '%$Pesquisas%'
-OR CONVERT(`SobreNome` USING utf8) LIKE '%$Pesquisas%' OR CONVERT(`CPF` USING utf8) LIKE '%$Pesquisas%'
-OR CONVERT(`TelContato1` USING utf8) LIKE '%$Pesquisas%' OR CONVERT(`TelContato2` USING utf8) LIKE '%$Pesquisas%' 
-OR CONVERT(`CodCliente` USING utf8) LIKE '%$Pesquisas%')";
+    <?php
+$pesquisa = '';
+if (isset($_GET['Pesquisa']) && is_string($_GET['Pesquisa'])) {
+    $pesquisa = trim($_GET['Pesquisa']);
+}
 
-#envia os comando a ser pesquisado para o banco de  dados
-$Querry = mysqli_query($conexao,$Pesquisador) or die(mysql_error());
-
-#conta quantos resultados teve na pesquisa
-$Row = mysqli_num_rows($Querry);
+$clientes = [];
+if ($pesquisa !== '') {
+    $termo = '%' . $pesquisa . '%';
+    $clientes = db_all(
+        'SELECT * FROM perfilcliente
+         WHERE Nome LIKE ? OR SobreNome LIKE ? OR CPF LIKE ?
+            OR TelContato1 LIKE ? OR TelContato2 LIKE ?
+            OR CAST(CodCliente AS TEXT) LIKE ?
+         ORDER BY Nome ASC',
+        [$termo, $termo, $termo, $termo, $termo, $termo]
+    );
+}
 ?>
 
 <div id="templatemo_wrapper">
@@ -46,7 +48,7 @@ $Row = mysqli_num_rows($Querry);
         
         <div id="templatemo_menu">
             <ul>
-                <li><a href="Cliente.php.php" class="current">Cliente</a></li>
+                <li><a href="Cliente.php" class="current">Cliente</a></li>
                 <li><a href="Inicio.php">Inicio</a></li>
                 <li><a href="Cliente.php">Cliente</a></li>
                 <li><a href="Agenda.php">Agenda</a></li>
@@ -70,54 +72,30 @@ Escritório de Advocacia.</p>
                     <div class="TabelaLetras">
 	            
                 <?php
-          #Valida os resultados e imprime echo $Pesquisa;
-          if($Row> 0){
-              echo  "<table border='1'";
-              echo'<tr>';
-                echo'<td>';
-               
-                echo "Nome";
-                
-                echo'</td>';
-                echo'<td>Telefone';
-                echo'</td>' ;
-                echo'<td>CPF';
-                 echo'</td>'     ;
-              echo'</tr>';
-              
-              
-              
-              
-           while($linha = mysqli_fetch_array($Querry)){
-          $nome = $linha['Nome'];
-          $Sobnome = $linha['SobreNome'];
-          $Tel = $linha['TelContato1'];
-          $CPF = $linha['CPF'];
-          $link = 'PerfilCliente.php?Cliente='.$linha['CodCliente'];
-
-          
-
-              echo'<tr>';
-                echo'<td>';
-                echo "<a href='{$link}'>";
-                echo $nome.' '.$Sobnome;
-                echo'</a>';
-                echo'</td>';
-                echo'<td>'.$Tel;
-                echo'</td>' ;
-                echo'<td>'.$CPF ;
-                 echo'</td>'     ;
-              echo'</tr>';
-           }
-          echo'</table>' ;}
-        ?> 		</div>
+                if ($pesquisa === '') {
+                    echo '<p>Digite um nome, CPF, telefone ou código do cliente.</p>';
+                } elseif ($clientes === []) {
+                    echo '<p>Nenhum cliente encontrado para "' . e($pesquisa) . '".</p>';
+                } else {
+                    echo '<table border="1">';
+                    echo '<tr><td>Nome</td><td>Telefone</td><td>CPF</td></tr>';
+                    foreach ($clientes as $cliente) {
+                        $link = 'PerfilCliente.php?Cliente=' . (int) $cliente['CodCliente'];
+                        echo '<tr><td><a href="' . e($link) . '">'
+                            . e($cliente['Nome'] . ' ' . $cliente['SobreNome'])
+                            . '</a></td><td>' . e($cliente['TelContato1'])
+                            . '</td><td>' . e($cliente['CPF']) . '</td></tr>';
+                    }
+                    echo '</table>';
+                }
+                ?>
     		</div>        
         </div>
         
        	<div class="col_w300 col_last">
 		
             
-            <form  action="PesquisaCliente.html" method="get">
+            <form  action="PesquisaCliente.php" method="get">
             <input autocomplete="on" value="Pesquisa" name="Pesquisa" type="search">
             <input name="Pesquisar" value="Pesquisar" type="submit"> </form>	
         </div>
@@ -179,21 +157,7 @@ Escritório de Advocacia.</p>
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

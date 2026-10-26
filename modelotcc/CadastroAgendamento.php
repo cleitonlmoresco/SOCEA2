@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA</title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -61,6 +61,7 @@ Escritório de Advocacia.</p>
             
             <div class="col_w620_content"> 
                 
+                <?php render_mensagens(); ?>
                 <h2>Novo agendamento.</h2>
             
                 
@@ -84,6 +85,7 @@ Escritório de Advocacia.</p>
 	<div id="content">
 		<div class="conteudo">
              	<form method="POST" action="Scripts/CadastrarAgendamento.php" name="CadastroAgendamento">
+                    <?php echo csrf_input(); ?>
                     
                     <span>Data do agendamento</span><br><input type="date" name="DataAgendamento">
                         <br>
@@ -95,14 +97,16 @@ Escritório de Advocacia.</p>
                     <span>Nome Advogado</span><br>
                         <select name="CodADV">
                            
-                        <?php 
-                        $query = mysqli_query($conexao, "SELECT * FROM `perfilusuario` WHERE `Funcao` LIKE '%ad%'");
-                      
-                        while ($row = mysqli_fetch_array($query)) {
-                            echo '<option >'.$row['Nome']." ".$row['SobreNome']." .".$row['CodUsuario'].'</option>';
-                            
+                        <?php
+                        $advogados = db_all(
+                            "SELECT CodUsuario, Nome, SobreNome FROM perfilusuario
+                             WHERE Funcao IN ('advogado', 'Admin') ORDER BY Nome ASC"
+                        );
+                        foreach ($advogados as $advogado) {
+                            echo '<option value="' . (int) $advogado['CodUsuario'] . '">'
+                                . e($advogado['Nome'] . ' ' . $advogado['SobreNome'])
+                                . '</option>';
                         }
-                        
                         ?>
                         </select>
                     <br>
@@ -115,6 +119,7 @@ Escritório de Advocacia.</p>
 		
                     <span>*Este agendamento será publicado soente para secretarios.</span>
                            <form method="POST" action="Scripts/CadastrarAgendamento.php" name="CadastrarAgendamento">
+                    <?php echo csrf_input(); ?>
                   
                                
                     <span>Agendamento</span><br><input type="text" name="Agendamento">
@@ -128,7 +133,6 @@ Escritório de Advocacia.</p>
                                 <span>Descriçao</span><br><textarea name="Descricao"  style="width: 450px; height: 130px;" ></textarea>
                             <br>
                                 <input type="submit" value="Agendar">
-                        </select>
                     
                     
                 </form>
@@ -240,21 +244,7 @@ Escritório de Advocacia.</p>
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

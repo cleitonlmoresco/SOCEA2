@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA</title>
-<?php //include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		//protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -50,20 +50,17 @@ Escritório de Advocacia.</p>
     
     <div id="templatemo_content">
     
-    	<div class="col_w300">
-		
-            <h3>Em Desenvolvimento..</h3>
-             </div>
-    
-        <div class="col_w300">
-		
-            <h3>Em Desenvolvimento..</h3>
-          	</div>
-        
-        <div class="col_w300 col_last">
-		
-            <h3>Em Desenvolvimento..</h3>
-             </div>
+    	<div class="col_w620_content">
+            <h3>Publicações</h3>
+            <div class="TabelaLetras">
+                <p>Este módulo ainda não está disponível nesta versão do SOCEA.</p>
+                <p>
+                    O acompanhamento de publicações e diários oficiais está previsto para uma
+                    próxima etapa. Enquanto isso, use a <a href="Agenda.php">agenda</a> e o
+                    <a href="Cliente.php">cadastro de clientes e processos</a>.
+                </p>
+            </div>
+        </div>
     
     	<div class="cleaner"></div>
     </div>
@@ -122,21 +119,7 @@ Escritório de Advocacia.</p>
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; exigir_admin(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -16,8 +17,7 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
 
 </head>
 <body><br><br>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 
 <div id="templatemo_wrapper">
 	
@@ -61,9 +61,11 @@ Escritório de Advocacia.</p>
     
         <div class="col_w300">
             <h3>Cadastro de Usuario</h3>
+            <?php render_mensagens(); ?>
             <br>
 		
             <form id="Cadastro" name="Cadastro" method="post" action="Scripts/Cadastrar.php" onsubmit="return validaCampo(this); ">
+                <?php echo csrf_input(); ?>
 
            <table width="625" border="0">
     <tr>
@@ -113,10 +115,10 @@ Escritório de Advocacia.</p>
     <tr>
       <td>Função</td>
       <td>
-          <select id="Funcao">
-              <option name = 'Secretario'>Secretario</option>
-              <option name = 'advogado'>Advogado</option>
-              <option name = 'Admin'>Advogado/Administrador</option>
+          <select id="Funcao" name="Funcao">
+              <option value="Secretario">Secretario</option>
+              <option value="advogado">Advogado</option>
+              <option value="Admin">Advogado/Administrador</option>
           </select>
           </td>
     </tr>
@@ -184,7 +186,7 @@ document.getElementById("RG").focus();
 return false
 }else
 if(document.getElementById("Funcao").value.length < 3){
-alert('Por favor, preencha o campo Fun�ao');
+alert('Por favor, preencha o campo Função');
 document.getElementById("Funcao").focus();
 return false
 }
@@ -250,21 +252,7 @@ return false
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

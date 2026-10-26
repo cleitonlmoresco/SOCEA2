@@ -1,0 +1,141 @@
+#MenuSuspEscr {
+    display: none;
+      position: fixed; 
+       right: 10%; 
+        top: 7%;
+        width: 250px;
+        height: 250px;
+        
+        
+       
+        color: #FFF;
+        background-color: #82a5b1;
+        text-align: center; 
+        z-index: 1000; 
+        border:outset;
+        border-color: blue;  
+    }
+  
+    #CaixadeEdiçao{
+        position: fixed;
+        display:none;
+            right: 50%; 
+        top: 10%;
+        background-color: #82a5b1;
+        border-color: blue;  
+    }
+    
+    #MenuSusAgenda {
+      position: fixed;
+       right: 18%; 
+        top: 7%;
+        width: 250px;
+        height: 250px;
+        
+        
+       
+        color: #FFF;
+        background-color: #82a5b1;
+        text-align: center;
+        z-index: 1000;
+        border:outset;
+        border-color: #127087;  
+    }
+
+    #MenuTopo{
+        background-color: #666;
+        position: fixed;
+        right: 0%; 
+        top: 0%;
+        width: 100%; 
+        height: 40px; 
+        background-color: #FFF;
+        
+    }
+    #MenuTopo table{
+        width: 820px;   
+    }
+    #MenuTopo h4{
+       font-size: 30px;
+      
+    }
+    
+.TabelaLetras table{
+    width: 620px;
+}
+.TabelaLetras a{
+    
+	display: block;
+	
+	font-size: 16px;
+	
+	color: #4a9db3;	
+	text-decoration: none;
+	font-weight: bold;
+	outline: none;
+      
+    
+    
+}
+.TextoInicio span{
+    font-size: 16pt;
+    
+}
+#JEditComent{
+     position: fixed;
+      
+         right: 40%; 
+          top: 40%;
+        background-color: #82a5b1;
+        border-color: blue;  
+    
+}
+
+
+/*Abas*/
+
+
+/* Mensagens de retorno (sucesso/erro) */
+.aviso {
+    margin: 10px 0;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+}
+.aviso-ok {
+    background: #e3f5e1;
+    border: 1px solid #4c9a45;
+    color: #245c20;
+}
+.aviso-erro {
+    background: #fbe4e4;
+    border: 1px solid #b33a3a;
+    color: #7a1f1f;
+}
+
+/* Painel simples da tela inicial */
+.painel {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 12px 0;
+}
+.painel .cartao {
+    flex: 1 1 140px;
+    border: 1px solid #b9cdd4;
+    border-radius: 4px;
+    padding: 12px;
+    background: #f3f8fa;
+    text-align: center;
+}
+.painel .cartao .numero {
+    display: block;
+    font-size: 26px;
+    font-weight: bold;
+    color: #31515e;
+}
+.painel .cartao .rotulo {
+    font-size: 13px;
+    color: #52707b;
+}

@@ -1,9 +1,29 @@
 <?php
-include('Conexao.php');
+require_once __DIR__ . '/Seguranca.php';
 
-$codProcesso = $_GET["cdp"];
-$CodArq=$_GET["ca"];
-$comentario = $_POST["EditarComentario"];
-$insert = "UPDATE `anexo` SET `Descricao` = '".$comentario."' WHERE `anexo`.`codArquivo` = ".$CodArq.";";
-$sql = mysqli_query($conexao ,$insert)or die("erro ao inserir dados");
-header("Location:http:../Processo.php?cdp=".$codProcesso);
+protegePagina();
+
+exigir_post();
+csrf_validar();
+
+$codProcesso = get_int('cdp');
+$codArquivo = get_int('ca');
+$comentario = post_str('EditarComentario');
+
+if ($codProcesso <= 0 || $codArquivo <= 0) {
+    http_response_code(400);
+    exit('Anexo inválido.');
+}
+
+$anexo = db_one(
+    'SELECT codArquivo FROM anexo WHERE codArquivo = ? AND codProcesso = ?',
+    [$codArquivo, $codProcesso]
+);
+if ($anexo === null) {
+    http_response_code(404);
+    exit('Anexo não encontrado.');
+}
+
+db_exec('UPDATE anexo SET Descricao = ? WHERE codArquivo = ?', [$comentario, $codArquivo]);
+
+redirecionar('../Processo.php?cdp=' . $codProcesso . '&ok=anexo');

@@ -1,0 +1,12 @@
+Options -Indexes
+
+# Bloqueia acesso direto ao banco SQLite, anexos e arquivos internos.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^dados/ - [F,L]
+    RewriteRule ^Scripts/Arquivos/ - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>

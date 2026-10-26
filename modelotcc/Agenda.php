@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA</title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -93,66 +93,47 @@ $(document).ready(function(){
 </script>
                                     
                                     
+        <?php render_mensagens(); ?>
         <?php
-        
-         if($_SESSION['Funcao']=='Admin'||$_SESSION['Funcao']=='advogado'){
-        $codUsuario = $_SESSION['usuarioID'];
-        
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-           
-            echo '<tr><td>'.$linhaAgend['DataAgendamento'].' '.$linhaAgend['HrAgendamento'].'</td>'
-                    . '<td>'.$linhaAgend['Descricao'].'</td>';
-         
-                    echo '<td><input type="image"  src="images/Anotaçoes.png" title= "Anoteções." id = "MostrarJconfAgenda'.$linhaAgend['CodAgendamento'].'"  width="30" height="35"></td>';
-            
+        $codUsuario = (int) $_SESSION['usuarioID'];
+        $agendamentos = agenda_do_usuario($codUsuario);
+
+        if ($agendamentos === []) {
+            echo '<tr><td colspan="3">Nenhum agendamento disponível.</td></tr>';
+        }
+
+        foreach ($agendamentos as $linhaAgend) {
+            $cod = (int) $linhaAgend['CodAgendamento'];
+            $data = e($linhaAgend['DataAgendamento']);
+            $hora = e($linhaAgend['HrAgendamento']);
+            $descricao = e($linhaAgend['Descricao']);
+
+            echo '<tr><td>' . $data . ' ' . $hora . '</td>'
+                . '<td>' . $descricao . '</td>'
+                . '<td><input type="image" src="images/Anotaçoes.png" title="Anotações" '
+                . 'id="MostrarJconfAgenda' . $cod . '" width="30" height="35"></td></tr>';
+
+            echo '<tr><td colspan="3"><div id="EditConfAgenda' . $cod . '" style="display:none">'
+                . '<div id="JEditComent">'
+                . '<input type="image" src="images/fechar.png" title="Fechar" '
+                . 'id="FecharJconfAgenda' . $cod . '" width="60" height="40">'
+                . '<form id="EditComentario' . $cod . '" action="Scripts/EditConfAgenda.php?ca=' . $cod . '" method="post">'
+                . csrf_input()
+                . '<span>Descrição</span><br><textarea name="EditarComentario" cols="40" rows="5">' . $descricao . '</textarea><br>'
+                . '<span>Data do agendamento</span><br><input type="date" value="' . $data . '" name="DataAgendamento"><br>'
+                . '<span>Hora do agendamento</span><br><input type="time" value="' . $hora . '" name="HoraAgendamento"><br>'
+                . '<input type="submit" name="Enviar" value="Alterar">'
+                . '<input type="submit" name="Enviar" value="Excluir">'
+                . '</form></div></div></td></tr>';
+
             echo '<script type="text/javascript">'
-             . ' $(document).ready(function(){'
-         
-             . '  $("#MostrarJconfAgenda'.$linhaAgend['CodAgendamento'].'").click(MostrarJconfAgenda'.$linhaAgend['CodAgendamento'].');'
-           
-             . ' $("#FecharJconfAgenda'.$linhaAgend['CodAgendamento'].'").click(FecharJconfAgenda'.$linhaAgend['CodAgendamento'].');});'
-             
-       . ' function MostrarJconfAgenda'.$linhaAgend['CodAgendamento'].'(){'
-             . '        $("#EditConfAgenda'.$linhaAgend['CodAgendamento'].'").show();'
-                    
-             . '    }'
-        . 'function FecharJconfAgenda'.$linhaAgend['CodAgendamento'].'(){'
-             . '        $("#EditConfAgenda'.$linhaAgend['CodAgendamento'].'").hide();'
-                    
-             . '    }</script>'//Fim Script
-        //Janela ediçao  de anotaçoes
-             . '<div id="EditConfAgenda'.$linhaAgend['CodAgendamento'].'" style="display:none">'
-        . '<div id="JEditComent">'
-          . '<input type="image"  src="images/fechar.png" title= "Anoteções." id = "FecharJconfAgenda'.$linhaAgend['CodAgendamento'].'"  width="60" height="40"></td>'
-        
-        . "<form id = 'EditComentario' action = 'Scripts/EditConfAgenda.php?ca=".$linhaAgend['CodAgendamento']."' method = 'post'>"
-       . '<span>Descrição</span><br><textarea name = "EditarComentario" cols="40" rows="5" >'.$linhaAgend['Descricao'].'</textarea>'
-           
-                           .' <br>'
-                   .' <span>Data do agendamento</span><br><input type="date" value="'.$linhaAgend['DataAgendamento'].'" name="DataAgendamento">'
-                        .'<br>'
-                    .'<span>Hora do agendamento</span><br><input type="time" value = "'.$linhaAgend['HrAgendamento'].'" name="HoraAgendamento">' 
-                            .'<br>'
-                            
-                                  . '<input type="submit" name="Enviar" value="Alterar">'
-                    . '<input type="submit" name="Enviar" value="Excuir" />'
-        . '</form>'
-        . '</div></div></tr>';        
-            
-            
-            
-            
-            
-                    echo '</tr>';
-     }
-         } else {
-             echo '<tr><td colspan="3">Nenhum Agndamento Disponivel.</td></tr>';
-        }}
-                
-         ?></table></div></div>
+                . '$(document).ready(function(){'
+                . '$("#MostrarJconfAgenda' . $cod . '").click(function(){$("#EditConfAgenda' . $cod . '").show();});'
+                . '$("#FecharJconfAgenda' . $cod . '").click(function(){$("#EditConfAgenda' . $cod . '").hide();});'
+                . '});</script>';
+        }
+        ?>
+        </table></div></div>
         </div>
          <div class="col_w300">
             
@@ -215,21 +196,7 @@ $(document).ready(function(){
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

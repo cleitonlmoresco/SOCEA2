@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA - Cliente </title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -18,17 +18,26 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
 
 </head>
 <body><br><br>
-    <?php #puxa a conexao  com o banco de dados
+    <?php
+    $codProcesso = get_int('cdp');
+    $processo = $codProcesso > 0
+        ? db_one('SELECT * FROM processo WHERE codProcesso = ?', [$codProcesso])
+        : null;
 
- include('Scripts/Conexao.php');
- include('Scripts/Anexos.php');
- 
-   $codProcesso = $_GET['cdp'];
-      $querryP = mysqli_query($conexao,"SELECT * FROM `processo` WHERE `codProcesso` ='".$codProcesso."'")or die(mysql_error());
-      $linhaP = mysqli_fetch_array($querryP);
-      $querryC = mysqli_query($conexao,"SELECT * FROM `perfilcliente` WHERE `CodCliente` = ".$linhaP['CodCliente']."");
-      $linhaC = mysqli_fetch_array($querryC);
-      ?>
+    if ($processo === null) {
+        http_response_code(404);
+        exit('Processo não encontrado.');
+    }
+
+    $cliente = db_one(
+        'SELECT * FROM perfilcliente WHERE CodCliente = ?',
+        [(int) $processo['CodCliente']]
+    );
+    $anexos = db_all(
+        'SELECT * FROM anexo WHERE codProcesso = ? ORDER BY codArquivo DESC',
+        [$codProcesso]
+    );
+    ?>
 
 <div id="templatemo_wrapper">
 	
@@ -40,7 +49,7 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
         
         <div id="templatemo_menu">
             <ul>
-                <li><a href="Cliente.php.php" class="current">Cliente</a></li>
+                <li><a href="Cliente.php" class="current">Cliente</a></li>
                 <li><a href="Inicio.php">Inicio</a></li>
                 <li><a href="Cliente.php">Cliente</a></li>
                 <li><a href="Agenda.php">Agenda</a></li>
@@ -63,137 +72,93 @@ Escritório de Advocacia.</p>
     	<div class="col_w620_w2col">
             
          	<div class="col_w620_content"> 
+                <?php render_mensagens(); ?>
+                <h3>Processo <?php echo e($processo['NumProcesso']); ?></h3>
+                <p>
+                    Cliente:
+                    <?php if ($cliente !== null): ?>
+                        <a href="PerfilCliente.php?Cliente=<?php echo (int) $cliente['CodCliente']; ?>">
+                            <?php echo e($cliente['Nome'] . ' ' . $cliente['SobreNome']); ?>
+                        </a>
+                    <?php else: ?>
+                        não encontrado
+                    <?php endif; ?>
+                    <?php if (trim((string) $processo['ObjetoDeAcao']) !== ''): ?>
+                        | Objeto: <?php echo e($processo['ObjetoDeAcao']); ?>
+                    <?php endif; ?>
+                </p>
                     <div class="TabelaLetras">
 	            
-    <table border = '1'>
+    <table border="1">
             <tr>
-                <th colspan="3" ><h4>Arquivos</h4></th>
-                
+                <th colspan="4"><h4>Arquivos</h4></th>
             </tr>
-           
-             <tr>
-        <td >
-        <?php
-        echo "<form id = 'arquivo' action = '' method = 'post' enctype='multipart/form-data'>";?>
-            Enviar arquivos: <input type = 'file' name = 'arquivo[]' multiple>
-            <input type="submit" name = "enviar" value="enviar">
-            <br>
-            <?php if(isset($mensagem)){
-            echo $mensagem;    
-            }
-            ?>
-                </form></td>
+            <tr>
+                <td colspan="4">
+                    <form id="arquivo" action="Scripts/Anexos.php?cdp=<?php echo (int) $codProcesso; ?>" method="post" enctype="multipart/form-data">
+                        <?php echo csrf_input(); ?>
+                        Enviar arquivos: <input type="file" name="arquivo[]" multiple>
+                        <input type="submit" name="enviar" value="Enviar">
+                    </form>
+                </td>
             </tr>
-            <tr><td colspan="3">Lista de Arquivos do Processo</td></tr>
-        <?php
-        $ComandoSql = "SELECT * FROM `anexo` WHERE `codProcesso` = '{$codProcesso}'";
-        $queryArq = mysqli_query($conexao,$ComandoSql)or die("Erro no QurrryArq");
-        $rowArq =mysqli_num_rows($queryArq)or die("Erro no QuryArq");
-        
-        
-         if($rowArq > 0){
-            echo "<tr><td> Nome do Arquivo </td>".
-             "<td>Data de Envio</td>".
-            "<td>Codigo do Arquivo</td></tr>";
-     while ($linhaArq =mysqli_fetch_array($queryArq)){
-           
-     	$extensao =strtoupper(@end(explode('.', $linhaArq['realNome'])));
-     	//executar arquivos em formato PDF
-            if ($extensao=='PDF'){
-              echo "<tr><td><a href='Scripts/Arquivos.php?cdg={$linhaArq['codArquivo']}' target='_blank'>{$linhaArq['realNome']}</td> "
-            ."<td>{$linhaArq['dataUpload']}</td>".
-             "<td>{$linhaArq['codArquivo']}</td>"
-                 . '<td><input type="image"  src="images/Anotaçoes.png" title= "Anoteções." id = "toggleLinha'.$linhaArq['codArquivo'].'"  width="30" height="35">'
-                                  
-             . "</tr>";
-             
-             echo '<!--Script toogle  Anotaçoes--> '
-     . '<script type="text/javascript">'
-             . ' $(document).ready(function(){'
-             . '  $("#toggleLinha'.$linhaArq['codArquivo'].'").click(toggleLinha'.$linhaArq['codArquivo'].');});'
-             . '     
-         function toggleLinha'.$linhaArq['codArquivo'].'(){'
-             . '        $("#AnotProces'.$linhaArq['codArquivo'].'").toggle();'
-             . '    }</script>'//Fim Script
-             . '<tr id="AnotProces'.$linhaArq['codArquivo'].'" style="display:none"> '
-        
-             . '<td colspan = "3">'.$linhaArq['Descricao'].'</td>'
-        //Mostrar Janela de ediçao de Cementarios
-        . '<td><input type="image"  src="images/EditAnotaçoes.png" title= "Anoteções." id = "toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'"  width="30" height="35"></td>'
-        
-
-//Script de Ediçao de anotaçoes
-   . '<script type="text/javascript">'
-             . ' $(document).ready(function(){'
-             . '  $("#toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'").click(toggleJEditAnotaçoes'.$linhaArq['codArquivo'].');});'
-             . '     
-         function toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'(){'
-             . '        $("#EditAnotaçoes'.$linhaArq['codArquivo'].'").toggle();'
-             . '    }</script>'//Fim Script
-        //Janela ediçao  de anotaçoes
-             . '<div id="EditAnotaçoes'.$linhaArq['codArquivo'].'" style="display:none">'
-        . '<div id="JEditComent">'
-         . '<input type="image"  src="images/fechar.png" id = "toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'"  width="60" height="35"></td>'
-        
-        
-        . "<form id = 'EditComentario' action = 'Scripts/EditDescrAnexo.php?cdp=".$codProcesso."&ca=".$linhaArq['codArquivo']."' method = 'post'>"
-        . '<textarea name = "EditarComentario" cols="40" rows="15" >'.$linhaArq['Descricao'].'</textarea>'
-        . '<br>  <input type="submit" value="Salvar Comentario">'
-        . '</form>'
-        . '</div></div></tr>';
-             
-     	}else {
-     	//executar outros formatos de arquivo
-     		echo "<tr><td><a href='Scripts/Arquivos/{$linhaArq['nomeArquivo']}' target='_blank'>{$linhaArq['realNome']}</td> "
-     		."<td>{$linhaArq['dataUpload']}". "</td>".
-                        
-                        
-     				"<td>{$linhaArq['codArquivo']}</td>"
-                                . '<td><input type="image"  src="images/Anotaçoes.png" title= "Anoteções." id = "toggleLinha'.$linhaArq['codArquivo'].'"  width="30" height="35">'
-                                        . "</td></tr>";
-
-//script mara mosrtrar comentarios dos arquivos                                
-echo '<!--Script toogle  Anotaçoes--> '
-     . '<script type="text/javascript">'
-             . ' $(document).ready(function(){'
-             . '  $("#toggleLinha'.$linhaArq['codArquivo'].'").click(toggleLinha'.$linhaArq['codArquivo'].');});'
-             . '     
-         function toggleLinha'.$linhaArq['codArquivo'].'(){'
-             . '        $("#AnotProces'.$linhaArq['codArquivo'].'").toggle();'
-             . '    }</script>'//Fim Script
-             . '<tr id="AnotProces'.$linhaArq['codArquivo'].'" style="display:none"> '
-        
-             . '<td colspan = "3">'.$linhaArq['Descricao'].'</td>'
-        //Mostrar Janela de ediçao de Cementarios
-        . '<td><input type="image"  src="images/EditAnotaçoes.png" title= "Anoteções." id = "toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'"  width="30" height="35"></td>'
-        
-
-//Script de Ediçao de anotaçoes
-   . '<script type="text/javascript">'
-             . ' $(document).ready(function(){'
-             . '  $("#toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'").click(toggleJEditAnotaçoes'.$linhaArq['codArquivo'].');});'
-             . '     
-         function toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'(){'
-             . '        $("#EditAnotaçoes'.$linhaArq['codArquivo'].'").toggle();'
-             . '    }</script>'//Fim Script
-        //Janela ediçao  de anotaçoes
-             . '<div id="EditAnotaçoes'.$linhaArq['codArquivo'].'" style="display:none">'
-        . '<div id="JEditComent">'
-         . '<input type="image"  src="images/fechar.png" id = "toggleJEditAnotaçoes'.$linhaArq['codArquivo'].'"  width="60" height="35"></td>'
-        
-        
-        . "<form id = 'EditComentario' action = 'Scripts/EditDescrAnexo.php?cdp=".$codProcesso."&ca=".$linhaArq['codArquivo']."' method = 'post'>"
-       . '<textarea name = "EditarComentario" cols="40" rows="15" >'.$linhaArq['Descricao'].'</textarea>'
-        . '<br>  <input type="submit" value="Salvar Comentario">'
-        . '</form>'
-        . '</div></div></tr>';
-                                
-     	}
-         
-            
-           } }
-        	
-        ?>
+            <tr><td colspan="4">Lista de Arquivos do Processo</td></tr>
+        <?php if ($anexos === []): ?>
+            <tr><td colspan="4">Nenhum arquivo anexado.</td></tr>
+        <?php else: ?>
+            <tr>
+                <td>Nome do Arquivo</td>
+                <td>Data de Envio</td>
+                <td>Código</td>
+                <td>Ações</td>
+            </tr>
+            <?php foreach ($anexos as $anexo): ?>
+                <?php
+                $codArquivo = (int) $anexo['codArquivo'];
+                $descricao = (string) $anexo['Descricao'];
+                ?>
+                <tr>
+                    <td>
+                        <a href="Scripts/Arquivos.php?cdg=<?php echo $codArquivo; ?>" target="_blank" rel="noopener">
+                            <?php echo e($anexo['realNome']); ?>
+                        </a>
+                    </td>
+                    <td><?php echo e($anexo['dataUpload']); ?></td>
+                    <td><?php echo $codArquivo; ?></td>
+                    <td>
+                        <input type="image" src="images/Anotaçoes.png" title="Anotações"
+                               id="toggleLinha<?php echo $codArquivo; ?>" width="30" height="35">
+                    </td>
+                </tr>
+                <tr id="AnotProces<?php echo $codArquivo; ?>" style="display:none">
+                    <td colspan="3"><?php echo nl2br(e($descricao)); ?></td>
+                    <td>
+                        <input type="image" src="images/EditAnotaçoes.png" title="Editar anotação"
+                               id="toggleJEditAnotacoes<?php echo $codArquivo; ?>" width="30" height="35">
+                    </td>
+                </tr>
+                <tr id="EditAnotacoes<?php echo $codArquivo; ?>" style="display:none">
+                    <td colspan="4">
+                        <form action="Scripts/EditDescrAnexo.php?cdp=<?php echo (int) $codProcesso; ?>&amp;ca=<?php echo $codArquivo; ?>" method="post">
+                            <?php echo csrf_input(); ?>
+                            <textarea name="EditarComentario" cols="60" rows="8"><?php echo e($descricao); ?></textarea>
+                            <br>
+                            <input type="submit" value="Salvar Comentário">
+                        </form>
+                    </td>
+                </tr>
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $("#toggleLinha<?php echo $codArquivo; ?>").click(function () {
+                            $("#AnotProces<?php echo $codArquivo; ?>").toggle();
+                        });
+                        $("#toggleJEditAnotacoes<?php echo $codArquivo; ?>").click(function () {
+                            $("#EditAnotacoes<?php echo $codArquivo; ?>").toggle();
+                        });
+                    });
+                </script>
+            <?php endforeach; ?>
+        <?php endif; ?>
         </table>
         
         
@@ -272,21 +237,7 @@ echo '<!--Script toogle  Anotaçoes--> '
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

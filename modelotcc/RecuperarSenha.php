@@ -1,81 +1,85 @@
-
+<?php
+require_once __DIR__ . '/Scripts/Seguranca.php';
+protegePagina();
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>SOCEA</title>
+<title>SOCEA - Alterar senha</title>
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
-<!-- 
-Blue Urban Template 
+<!--
+Blue Urban Template
 http://www.templatemo.com/preview/templatemo_329_blue_urban
 -->
 <link href="templatemo_style.css" rel="stylesheet" type="text/css" />
-
 </head>
 <body>
 
 <div id="templatemo_wrapper">
-	
+
     <div id="templatemo_header">
-    
-   		<div id="site_title">
-            <h1><a href="#">SOCEA</span></a></h1>
+
+        <div id="site_title">
+            <h1><a href="Inicio.php">SOCEA</a></h1>
         </div> <!-- end of site_title -->
-       
+
     </div>
-    
+
     <div id="templatemo_middle">
-    
-    	<h1>SOCEA</h1>
-        <p>Sistema de Organização e Cobrança de 
+
+        <h1>SOCEA</h1>
+        <p>Sistema de Organização e Cobrança de
 Escritório de Advocacia.</p>
-        
-    
+
     </div>
-    
+
     <div id="templatemo_content">
-    
-    	<div class="col_w300">
-		
-            
-            <div class="image_wrapper"></div>
-          	
-               
-                    
-        </div>
-    
-        <div class="col_w300">
-		
-            <h3><Center>Efetue o seu Login.</Center></h3>
-          	      
-            <form action="Scripts/Valida.php" method="post" name="Login">
-                <p><center>E-mail</center></p>
-                      <center> &nbsp;<input size="30" name="Email" type="text">&nbsp;
-                              <p>&nbsp;Senha</p><br>
-                        <p style="margin-top: -17px; margin-left: 6px;"> <input
-                            size="15" name="Senha" type="password"></p>
-                        <p><a href="%20">Esqueci
-                            senha 
-                                <p><a href="%20">Alterar senha.<br></br>
-                          </a></p>
-                        <input value="Entrar" id="Entrar" name="Entrar" type="submit">
-                    
-            
-      </center></form>
-			
+
+        <div class="col_w620_content">
+
+            <h3>Alterar senha</h3>
+            <?php render_mensagens(); ?>
+
+            <form action="Scripts/AlterarSenha.php" method="post" name="AlterarSenha">
+                <?php echo csrf_input(); ?>
+                <table border="0" width="420">
+                    <tr>
+                        <td>Senha atual</td>
+                        <td><input name="SenhaAtual" type="password" required></td>
+                    </tr>
+                    <tr>
+                        <td>Nova senha</td>
+                        <td><input name="NovaSenha" type="password" minlength="8" required></td>
+                    </tr>
+                    <tr>
+                        <td>Confirmar nova senha</td>
+                        <td><input name="ConfNovaSenha" type="password" minlength="8" required></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <input value="Alterar senha" type="submit">
+                            &nbsp; <a href="Inicio.php">Voltar</a>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
             <div class="cleaner"></div>
-	</div><div class="cleaner"></div>
+        </div>
+
+        <div class="cleaner"></div>
     </div>
-    
+
     <div id="templatemo_footer">
-    
-    	  <?php include 'Scripts/Versao.php'; ?>
-    	 <a href="#">SOCEA </a> V. <?php echo $Versao;?>
-         
+
+        <?php include 'Scripts/Versao.php'; ?>
+        <a href="Inicio.php">SOCEA</a> V. <?php echo e($Versao); ?>
+
     </div>
-    
+
 </div>
 
 </body>

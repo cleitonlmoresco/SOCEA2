@@ -1,0 +1,14 @@
+# Banco e anexos locais (nunca versionar dados de clientes)
+dados/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
+
+# Anexos antigos que ficavam dentro da pasta pública
+modelotcc/Scripts/Arquivos/*
+!modelotcc/Scripts/Arquivos/.htaccess
+
+# Configurações locais
+.env
+php.ini

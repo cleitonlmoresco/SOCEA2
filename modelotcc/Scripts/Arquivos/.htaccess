@@ -1,0 +1,9 @@
+# Defesa em profundidade: anexos não devem ser servidos diretamente.
+# O download é feito por Scripts/Arquivos.php, que valida a sessão.
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

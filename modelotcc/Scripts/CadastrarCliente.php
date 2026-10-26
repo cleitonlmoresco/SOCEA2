@@ -1,34 +1,46 @@
-.<?php
-include('Conexao.php');
+<?php
+require_once __DIR__ . '/Seguranca.php';
 
+protegePagina();
 
+exigir_post();
+csrf_validar();
 
- $nome = $_POST['nome'];
- $sobNome = $_POST['sobNome'];
- $nascimento = $_POST['nascimento'];
- $CPF = $_POST['CPF'];
- $RG = $_POST['RG'];
- $estadoCiv = $_POST['estCivil'];
- $endereco= $_POST['Endereco'];
- $bairro= $_POST['bairro'];
- $cidade= $_POST['cidade'];
- $UF= $_POST['UF'];
- $CEP= $_POST['CEP'];
- $tel1= $_POST['tel1'];
- $tel2= $_POST['tel2'];
- $email1= $_POST['email1'];
- $email2= $_POST['email2'];
- $fax= $_POST['fax'];
- $grupo= $_POST['grupo'];
- $nacionalidade= $_POST['nacionalidade'];
- $perfil= $_POST['perfil'];
- $contato= $_POST['contato'];
- $profissao= $_POST['profissao'];
- $PIS= $_POST['PIS'];
-$insert = "INSERT INTO `perfilcliente` (`Nome`, `SobreNome`, `Grupo`, `Perfil`, `Profissao`, `CEP`, `Endereco`, `Cidade`, `UF`, `CPF`, `RG`, `PIS`, `Nascimento`, `Fax`, `Nacionalidade`, `EstadoCivil`, `Bairro`, `Email1`, `Email2`, `Contato`, `TelContato1`, `TelContato2`) 
-VALUES ('$nome', '$sobNome', '$grupo', '$perfil', '$profissao', '$CEP', '$endereco', '$cidade', '$UF', '$CPF', '$RG', '$PIS', '$nascimento', '$fax', '$nacionalidade', '$estadoCiv', '$bairro', '$email1', '$email2', '$contato', '$tel1', '$tel2')";
+$nome = post_str('nome');
+if ($nome === '') {
+    redirecionar('../Cliente.php?erro=nome');
+}
 
-$sql = mysqli_query($conexao ,$insert)or die("erro ao inserir dados");
+$dados = [
+    'Nome' => $nome,
+    'SobreNome' => post_str('sobNome'),
+    'Grupo' => post_str('grupo'),
+    'Perfil' => post_str('perfil'),
+    'Profissao' => post_str('profissao'),
+    'CEP' => post_str('CEP'),
+    'Endereco' => post_str('Endereco'),
+    'Cidade' => post_str('cidade'),
+    'UF' => post_str('UF'),
+    'CPF' => post_str('CPF'),
+    'RG' => post_str('RG'),
+    'PIS' => post_str('PIS'),
+    'Nascimento' => post_str('nascimento'),
+    'Fax' => post_str('fax'),
+    'Nacionalidade' => post_str('nacionalidade'),
+    'EstadoCivil' => post_str('estCivil'),
+    'Bairro' => post_str('bairro'),
+    'Email1' => post_str('email1'),
+    'Email2' => post_str('email2'),
+    'Contato' => post_str('contato'),
+    'TelContato1' => post_str('tel1'),
+    'TelContato2' => post_str('tel2'),
+];
 
+$colunas = array_keys($dados);
+$marcadores = array_fill(0, count($colunas), '?');
+$sql = 'INSERT INTO perfilcliente (`' . implode('`, `', $colunas) . '`) VALUES ('
+    . implode(', ', $marcadores) . ')';
 
-header("Location:http:../Cliente.php ");
+db_insert($sql, array_values($dados));
+
+redirecionar('../Cliente.php?ok=1');

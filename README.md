@@ -121,8 +121,9 @@ find modelotcc -name '*.php' -print0 | xargs -0 -n1 php -l
 php modelotcc/tests/smoke.php
 ```
 
-O workflow em `.github/workflows/ci.yml` roda lint, teste de fumaça e um smoke HTTP
-em todas as pushes e pull requests.
+O workflow pronto está em `ci/github-actions.yml` (lint, teste de fumaça e smoke
+HTTP). Para ativá-lo, copie o arquivo para `.github/workflows/ci.yml`; o token
+do GitHub usado no push precisa do escopo `workflow` (`gh auth refresh -s workflow`).
 
 ## Limitações conhecidas
 

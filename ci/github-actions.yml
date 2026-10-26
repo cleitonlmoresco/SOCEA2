@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_sqlite, sqlite3, mbstring, fileinfo
+          coverage: none
+
+      - name: Lint de todos os arquivos PHP
+        run: find modelotcc -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Teste de fumaça do banco
+        run: php modelotcc/tests/smoke.php
+
+      - name: Smoke HTTP
+        run: |
+          php -S 127.0.0.1:8099 -t modelotcc > /tmp/php-server.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8099/index.php | grep -q 'csrf_token'
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/Inicio.php)" = "302"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8099/Scripts/Arquivos.php?cdg=1)" = "302"
+
+      - name: Log do servidor em caso de falha
+        if: failure()
+        run: cat /tmp/php-server.log || true

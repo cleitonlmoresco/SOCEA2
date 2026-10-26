@@ -5,6 +5,7 @@
  * Uso:
  *   php Scripts/init_db.php
  *   php Scripts/init_db.php --demo
+ *   SOCEA_ADMIN_SENHA='nova-senha-forte' php Scripts/init_db.php --reset-admin
  */
 
 if (PHP_SAPI !== 'cli') {
@@ -16,6 +17,33 @@ require_once __DIR__ . '/Conexao.php';
 
 $pdo = db();
 echo 'Banco: ' . socea_db_path() . PHP_EOL;
+
+if (in_array('--reset-admin', $argv, true)) {
+    $email = getenv('SOCEA_ADMIN_EMAIL') ?: 'admin@socea.local';
+    $senha = getenv('SOCEA_ADMIN_SENHA');
+    if ($senha === false || strlen($senha) < 8) {
+        fwrite(STDERR, "Defina SOCEA_ADMIN_SENHA com pelo menos 8 caracteres.\n");
+        exit(1);
+    }
+
+    $hash = password_hash($senha, PASSWORD_DEFAULT);
+    $admin = db_one('SELECT CodUsuario FROM perfilusuario WHERE Login = ?', [$email]);
+    if ($admin !== null) {
+        db_exec(
+            'UPDATE perfilusuario SET Senha = ?, Funcao = ? WHERE CodUsuario = ?',
+            [$hash, 'Admin', (int) $admin['CodUsuario']]
+        );
+        echo "Senha do administrador {$email} atualizada." . PHP_EOL;
+    } else {
+        db_insert(
+            'INSERT INTO perfilusuario (Login, Senha, Nome, SobreNome, Telefone, CPF, RG, Funcao)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [$email, $hash, 'Administrador', 'SOCEA', '', '', '', 'Admin']
+        );
+        echo "Administrador {$email} criado." . PHP_EOL;
+    }
+    exit(0);
+}
 
 if (in_array('--demo', $argv, true)) {
     $clientes = (int) $pdo->query('SELECT COUNT(*) FROM perfilcliente')->fetchColumn();

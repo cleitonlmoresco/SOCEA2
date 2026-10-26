@@ -29,6 +29,13 @@ php -S 127.0.0.1:8099 -t .
 
 Acesse <http://127.0.0.1:8099/index.php>.
 
+Para redefinir a senha do administrador em uma instalação existente:
+
+```powershell
+$env:SOCEA_ADMIN_SENHA = "uma-senha-forte"
+php Scripts/init_db.php --reset-admin
+```
+
 ### Login inicial
 
 | E-mail | Senha |
@@ -36,7 +43,8 @@ Acesse <http://127.0.0.1:8099/index.php>.
 | `admin@socea.local` | `Admin@12345` |
 
 > **Troque a senha no primeiro acesso** (menu Início → Alterar minha senha) e/ou
-> defina `SOCEA_ADMIN_EMAIL` e `SOCEA_ADMIN_SENHA` antes de criar o banco.
+> defina `SOCEA_ADMIN_EMAIL` e `SOCEA_ADMIN_SENHA` antes de criar o banco. Em
+> bancos já existentes, use `init_db.php --reset-admin`.
 
 ## Variáveis de ambiente
 
@@ -45,7 +53,7 @@ Acesse <http://127.0.0.1:8099/index.php>.
 | `SOCEA_DB` | `dados/socea.sqlite` | Caminho do arquivo SQLite |
 | `SOCEA_UPLOAD_DIR` | `dados/arquivos` | Pasta dos anexos (fora da área pública) |
 | `SOCEA_ADMIN_EMAIL` | `admin@socea.local` | Login do administrador inicial |
-| `SOCEA_ADMIN_SENHA` | `Admin@12345` | Senha do administrador inicial |
+| `SOCEA_ADMIN_SENHA` | `Admin@12345` | Senha do administrador inicial ou do `--reset-admin` |
 | `SOCEA_UPLOAD_MAX` | `10485760` (10 MB) | Tamanho máximo por arquivo |
 
 Exemplo no PowerShell:

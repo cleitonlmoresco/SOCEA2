@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA</title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -57,61 +57,56 @@ Escritório de Advocacia.</p>
                     <div class="TabelaLetras">
                     <a href="CadastroCliente.php">Cadastrar Cliente</a><br>
                     <br>
-                       <?php $letras = array("A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
-    "N", "O", "P", "Q", "R", "S", "U", "V", "W", "Y", "X", "Y", "Z");
-          $Pesq = '';
-         if (isset($_GET["pesquisa"])){
-         $Pesq = $_GET["pesquisa"];}             
-        $QuerrLinha = mysqli_query($conexao,"SELECT * FROM `perfilcliente` WHERE `Nome` LIKE '".$Pesq."%' ORDER BY `Nome` ASC")or die(mysql_error());
-         $RowLinha = mysqli_num_rows($QuerrLinha);
+                       <?php
+                       render_mensagens();
 
-    echo"<table border = '1'><tr>";
-//Tabela onde indica as letras para pesquisar
-    for ($in = 0;$in<=25;$in++){
-             $QuerrNome = mysqli_query($conexao ,"SELECT * FROM `perfilcliente` WHERE `Nome` LIKE '".$letras[$in]."%' ORDER BY `Nome` ASC")or die(mysql_error());
-   $RowNome = mysqli_num_rows($QuerrNome);
-                  
-if($RowNome>0){   
-                  echo "<td> <a href = 'Cliente.php?pesquisa={$letras[$in]}'>{$letras[$in]}</td>";
-             
-    }  else {echo "<td> <p>{$letras[$in]}</p></td>";
-        
-    }}
+                       $letras = range('A', 'Z');
+                       $pesq = '';
+                       if (isset($_GET['pesquisa']) && is_string($_GET['pesquisa'])) {
+                           $pesq = strtoupper(substr(trim($_GET['pesquisa']), 0, 1));
+                       }
 
-echo '</tr></table><br>';
-echo '<table border = "1">';
- echo'<tr>';
-                echo'<td>';
-                echo "Nome";
-            
-                echo'</td>';
-                echo'<td>Telefone';
-                echo'</td>' ;
-                echo'<td>CPF' ;
-                 echo'</td>'     ;
-              echo'</tr>';
+                       $clientes = db_all(
+                           'SELECT * FROM perfilcliente WHERE Nome LIKE ? ORDER BY Nome ASC',
+                           [$pesq . '%']
+                       );
 
-  while($LinhaNome = mysqli_fetch_array($QuerrLinha)){
-          $nome = $LinhaNome['Nome'];
-          $Sobnome = $LinhaNome['SobreNome'];
-          $Tel = $LinhaNome['TelContato1'];
-          $CPF = $LinhaNome['CPF'];
-          $link = 'PerfilCliente.php?Cliente='.$LinhaNome['CodCliente'];
-          echo'<tr>';
-                echo'<td>';
-                echo "<a href='{$link}'>";
-                echo $nome.' '.$Sobnome;
-                echo'</a>';
-                echo'</td>';
-                echo'<td>'.$Tel;
-                echo'</td>' ;
-                echo'<td>'.$CPF ;
-                 echo'</td>'     ;
-              echo'</tr>';
-           }
-          echo'</table>' ;
-          
-                ?>
+                       $comClientes = [];
+                       foreach (db_all("SELECT DISTINCT UPPER(substr(Nome, 1, 1)) AS letra FROM perfilcliente") as $linhaLetra) {
+                           $comClientes[(string) $linhaLetra['letra']] = true;
+                       }
+
+                       echo '<table border="1"><tr>';
+                       foreach ($letras as $letra) {
+                           if (isset($comClientes[$letra])) {
+                               echo '<td><a href="Cliente.php?pesquisa=' . $letra . '">' . $letra . '</a></td>';
+                           } else {
+                               echo '<td><p>' . $letra . '</p></td>';
+                           }
+                       }
+                       echo '</tr></table><br>';
+                       ?>
+                       <table border="1">
+                           <tr>
+                               <td>Nome</td>
+                               <td>Telefone</td>
+                               <td>CPF</td>
+                           </tr>
+                           <?php if ($clientes === []): ?>
+                               <tr><td colspan="3">Nenhum cliente encontrado.</td></tr>
+                           <?php endif; ?>
+                           <?php foreach ($clientes as $cliente): ?>
+                               <tr>
+                                   <td>
+                                       <a href="PerfilCliente.php?Cliente=<?php echo (int) $cliente['CodCliente']; ?>">
+                                           <?php echo e($cliente['Nome'] . ' ' . $cliente['SobreNome']); ?>
+                                       </a>
+                                   </td>
+                                   <td><?php echo e($cliente['TelContato1']); ?></td>
+                                   <td><?php echo e($cliente['CPF']); ?></td>
+                               </tr>
+                           <?php endforeach; ?>
+                       </table>
                     
 	            
                         </div>	
@@ -183,21 +178,7 @@ echo '<table border = "1">';
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

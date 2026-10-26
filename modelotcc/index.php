@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; if (usuario_logado()) { redirecionar('Inicio.php'); } ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -22,16 +23,6 @@ http://www.templatemo.com/preview/templatemo_329_blue_urban
    		<div id="site_title">
             <h1><a href="#">SOCEA</span></a></h1>
         </div> <!-- end of site_title -->
-        <!--
-        <div id="templatemo_menu">
-            <ul>
-                <li><a href="Inicio.html" class="current">Inicio</a></li>
-                <li><a href="Inicio.html">Inicio</a></li>
-                <li><a href="Cliente.html">Cliente</a></li>
-                <li><a href="Agenda.html">Agenda</a></li>
-                <li><a href="Publicacoes.html">Publicações</a></li>
-            </ul>    	
-        </div> <!-- end of templatemo_menu -->
     
     </div>
     
@@ -57,18 +48,16 @@ Escritório de Advocacia.</p>
     
         <div class="col_w300">
 		
-            <h3><Center>Efetue o seu Login.</Center></h3>
-          	      
+            <h3><center>Efetue o seu Login.</center></h3>
+            <?php render_mensagens(); ?>
             <form action="Scripts/Valida.php" method="post" name="Login">
+                <?php echo csrf_input(); ?>
                 <p><center>E-mail</center></p>
                       <center> &nbsp;<input size="30" name="Email" type="text">&nbsp;
                               <p>&nbsp;Senha</p><br>
                         <p style="margin-top: -17px; margin-left: 6px;"> <input
                             size="15" name="Senha" type="password"></p>
-                        <p><a href="%20">Esqueci
-                                senha </a>
-                            <p><a href="RecuperarSenha.php">Alterar senha.<br></br>
-                          </a></p>
+                        <p><a href="RecuperarSenha.php">Alterar senha</a></p>
                         <input value="Entrar" id="Entrar" name="Entrar" type="submit">
                     
             

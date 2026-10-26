@@ -1,10 +1,10 @@
+<?php require_once __DIR__ . '/Scripts/Seguranca.php'; protegePagina(); ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>SOCEA</title>
-<?php include("Scripts/Seguranca.php"); // Inclui o arquivo com o sistema de segurança
-		protegePagina(); // Chama a função que protege a página?>
+
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <!-- templatemo 329 blue urban -->
@@ -52,29 +52,70 @@ Escritório de Advocacia.</p>
     <div id="templatemo_content">
     
     	<div class="col_w620_w2col">
+            <?php
+            render_mensagens();
+
+            $totalClientes = (int) db_one('SELECT COUNT(*) AS total FROM perfilcliente')['total'];
+            $totalProcessos = (int) db_one('SELECT COUNT(*) AS total FROM processo')['total'];
+            $totalAgendamentos = (int) db_one(
+                'SELECT COUNT(*) AS total FROM Agendamento WHERE AgendamentoDe = ?',
+                [(int) $_SESSION['usuarioID']]
+            )['total'];
+            $proximos = db_all(
+                'SELECT DataAgendamento, HrAgendamento, Descricao FROM Agendamento
+                 WHERE AgendamentoDe = ? AND DataAgendamento >= ?
+                 ORDER BY DataAgendamento ASC, HrAgendamento ASC LIMIT 5',
+                [(int) $_SESSION['usuarioID'], date('Y-m-d')]
+            );
+            ?>
             <div class="TextoInicio">
-            <h3>Bem vindo ao SOCEA.</h3>
-            <span>Aqui no SOCEA voce pode estar cadastrando processos com facilidade,
-               
-                  fazer sua agenda sem ter problemas de perder horario e tambem anexar 
-                 
-                    documentos de processo com segurança sem ter problemas que outros
-                    
-                     acessem os documentos.
-                     
-                         
-            
-            
-            </span>
-            
-            </div></div>
+                <h3>Bem-vindo(a), <?php echo e($_SESSION['usuarioNome']); ?>.</h3>
+                <span>Painel rápido do escritório.</span>
+            </div>
+
+            <div class="painel">
+                <div class="cartao">
+                    <span class="numero"><?php echo $totalClientes; ?></span>
+                    <span class="rotulo">Clientes</span>
+                </div>
+                <div class="cartao">
+                    <span class="numero"><?php echo $totalProcessos; ?></span>
+                    <span class="rotulo">Processos</span>
+                </div>
+                <div class="cartao">
+                    <span class="numero"><?php echo $totalAgendamentos; ?></span>
+                    <span class="rotulo">Seus agendamentos</span>
+                </div>
+            </div>
+
+            <h3>Próximos compromissos</h3>
+            <?php if ($proximos === []): ?>
+                <p>Nenhum compromisso futuro. <a href="CadastroAgendamento.php">Criar agendamento</a>.</p>
+            <?php else: ?>
+                <table border="1">
+                    <tr><th>Data</th><th>Hora</th><th>Descrição</th></tr>
+                    <?php foreach ($proximos as $compromisso): ?>
+                        <tr>
+                            <td><?php echo e($compromisso['DataAgendamento']); ?></td>
+                            <td><?php echo e($compromisso['HrAgendamento']); ?></td>
+                            <td><?php echo e($compromisso['Descricao']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </table>
+            <?php endif; ?>
+        </div>
     
         
         
         <div class="col_w300 col_last">
-		
-            
-             </div>
+            <h3>Atalhos</h3>
+            <ul>
+                <li><a href="CadastroCliente.php">Cadastrar cliente</a></li>
+                <li><a href="CadastroAgendamento.php">Novo agendamento</a></li>
+                <li><a href="Cliente.php">Consultar clientes</a></li>
+                <li><a href="RecuperarSenha.php">Alterar minha senha</a></li>
+            </ul>
+        </div>
     
     	<div class="cleaner"></div>
     </div>
@@ -133,21 +174,7 @@ Escritório de Advocacia.</p>
         <a href="Agenda.php">Agenda</a> 
         
             
-        <ul type="circle">
-                 
-        <?php 
-        $codUsuario = $_SESSION['usuarioID'];
-        $queryAgendtable = mysqli_query($conexao,"SELECT * FROM `Agendamento` WHERE `AgendamentoDe` = ".$codUsuario);
-        $rowAgenda = mysqli_num_rows($queryAgendtable);
-     if($rowAgenda >0){
-         while ($linhaAgend =mysqli_fetch_array($queryAgendtable)){
-            echo "<li>".$linhaAgend['CodAgendamento']."</li>";
-            
-     }
-         }
-        ?> 
-        
-             </ul>
+        <?php render_agenda_menu(); ?>
           
             </div>
     

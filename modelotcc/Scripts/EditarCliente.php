@@ -1,39 +1,57 @@
 <?php
+require_once __DIR__ . '/Seguranca.php';
 
+protegePagina();
 
-include('Conexao.php');
+exigir_post();
+csrf_validar();
 
+$codCliente = get_int('Cl');
+if ($codCliente <= 0) {
+    http_response_code(400);
+    exit('Cliente inválido.');
+}
 
- $codCliente = $_GET['Cl'];
- $nome = $_POST['nome'];
- $sobNome = $_POST['sobNome'];
- $nascimento = $_POST['nascimento'];
- $CPF = $_POST['CPF'];
- $RG = $_POST['RG'];
- $estadoCiv = $_POST['estCivil'];
- $endereco= $_POST['Endereco'];
- $bairro= $_POST['bairro'];
- $cidade= $_POST['cidade'];
- $UF= $_POST['UF'];
- $CEP= $_POST['CEP'];
- $tel1= $_POST['tel1'];
- $tel2= $_POST['tel2'];
- $email1= $_POST['email1'];
- $email2= $_POST['email2'];
- $fax= $_POST['fax'];
- $grupo= $_POST['grupo'];
- $nacionalidade= $_POST['nacionalidade'];
- $perfil= $_POST['perfil'];
- $contato= $_POST['contato'];
- $profissao= $_POST['profissao'];
- $PIS= $_POST['PIS'];
-$insert = "UPDATE `perfilcliente` SET `Nome` = '".$nome."', `Grupo` = '".$grupo."', "
-        . "`Perfil` = '".$perfil."', `Profissao` = '".$profissao."', `CEP` = '".$CEP."', "
-        . "`Endereco` = '".$endereco."', `Cidade` = '".$cidade."', `UF` = '".$UF."', "
-        . "`CPF` = '".$CPF."', `RG` = '".$RG."', `PIS` = '".$PIS."', `"
-        . "Nascimento` = '".$nascimento."', `Fax` = '".$fax."', `Nacionalidade` = '".$nacionalidade."',"
-        . " `Contato` = '".$contato."', `TelContato1` = '".$tel1."', `TelContato2` = '".$tel2."' "
-        . "WHERE `perfilcliente`.`CodCliente` = ".$codCliente."; ";
+$nome = post_str('nome');
+if ($nome === '') {
+    redirecionar('../PerfilCliente.php?Cliente=' . $codCliente . '&erro=nome');
+}
 
-$sql = mysqli_query($conexao ,$insert)or die("erro ao inserir dados");
-header("Location: ".'../PerfilCliente.php?Cliente='.$codCliente);
+$dados = [
+    'Nome' => $nome,
+    'SobreNome' => post_str('sobNome'),
+    'Grupo' => post_str('grupo'),
+    'Perfil' => post_str('perfil'),
+    'Profissao' => post_str('profissao'),
+    'CEP' => post_str('CEP'),
+    'Endereco' => post_str('Endereco'),
+    'Cidade' => post_str('cidade'),
+    'UF' => post_str('UF'),
+    'CPF' => post_str('CPF'),
+    'RG' => post_str('RG'),
+    'PIS' => post_str('PIS'),
+    'Nascimento' => post_str('nascimento'),
+    'Fax' => post_str('fax'),
+    'Nacionalidade' => post_str('nacionalidade'),
+    'EstadoCivil' => post_str('estCivil'),
+    'Bairro' => post_str('bairro'),
+    'Email1' => post_str('email1'),
+    'Email2' => post_str('email2'),
+    'Contato' => post_str('contato'),
+    'TelContato1' => post_str('tel1'),
+    'TelContato2' => post_str('tel2'),
+];
+
+$sets = [];
+foreach (array_keys($dados) as $coluna) {
+    $sets[] = "`{$coluna}` = ?";
+}
+$parametros = array_values($dados);
+$parametros[] = $codCliente;
+
+db_exec(
+    'UPDATE perfilcliente SET ' . implode(', ', $sets) . ' WHERE CodCliente = ?',
+    $parametros
+);
+
+redirecionar('../PerfilCliente.php?Cliente=' . $codCliente . '&ok=1');
